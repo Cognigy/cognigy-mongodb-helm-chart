@@ -39,7 +39,7 @@ main() {
         connection_string="$(yq e '.data.connection-string' "original_secrets/$filename" | base64 --decode)"
         connection_string_new="$(echo "${connection_string/$mongo_host/$mongo_host_new}" | base64 | tr -d '\n')"
 
-        yq e ".data.connection-string = \"$connection_string_new\"" original_secrets/"$filename" > new_secrets/"$name"_new.yaml
+        yq e ".data.connection-string = \"$connection_string_new\"" original_secrets/"$filename" > new_secrets/"$filename"
 
     done; 
 }
