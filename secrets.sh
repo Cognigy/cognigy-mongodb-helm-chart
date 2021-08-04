@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-# This script is a wrapper script for the Ansible playbook to deploy the Honda Excide application on a virtual machine. 
-# It checks for some prerequisites and installs them if necessary and afterwards executes the Ansible playbook.
+# This script gets a set of defined secrets and replaces the MongoDB hosts in a connection string.
 
 set -o errexit
 set -o nounset
