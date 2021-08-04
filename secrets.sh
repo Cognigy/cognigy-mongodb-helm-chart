@@ -17,6 +17,12 @@ main() {
     read -rp "Enter current MongoDB host: " mongo_host
     read -rp "Enter new MongoDB host(s): " mongo_host_new
 
+    echo "Checking for YQ ..."
+    if ! (yq --version > /dev/null); then
+        echo "YQ not found. Please install it through snap or brew. Alternatively it can be downloaded from Github: https://github.com/mikefarah/yq/"
+        exit 1
+    fi
+
     echo -n "Checking for active Kubernetes cluster..."
     if ! (kubectl get nodes > /dev/null); then
         echo -n "No active Kubernetes cluster found. Please activate the appropriate kubeconfig. Exiting..."
