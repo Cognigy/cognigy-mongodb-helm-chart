@@ -28,6 +28,8 @@ main() {
         exit 1
     fi
 
+    echo "Writing secrets..."
+
     for name in $secrets; do
 
         mkdir -p new_secrets original_secrets
@@ -41,6 +43,8 @@ main() {
         yq e ".data.connection-string = \"$connection_string_new\"" original_secrets/"$filename" > new_secrets/"$filename"
 
     done; 
+
+    echo "Done."
 }
 
 
