@@ -8,7 +8,7 @@ This is the Helm setup for the Multi-Replica MongoDB architecture. It uses the [
 The migration process from a single node setup to a replica one involves several steps. These are described in the following paragraphs. This guide assumes the "old" MongoDB server to be deployed in the `default` namespace and will install the "new" MongoDB ReplicaSet into the namespace `mongodb`.
 
 ### Deployment
-To deploy the new MongoDB setup adjust the values accordingly in the `values.yaml` file. Most likely you will just have to adjust the root password for the database. In order to have it set to the same one as before you can find out the current one by executing the following on the appropriate Kubernetes cluster:
+To deploy the new MongoDB setup adjust the values accordingly in the `values.yaml` file. Most likely you will just have to adjust the root password for the database. Also, the size of the Persistent Volume Claim should be adjusted as needed. In order to have it set to the same one as before you can find out the current one by executing the following on the appropriate Kubernetes cluster:
 ```
 kubectl get secret cognigy-mongo-server -ojsonpath='{.data.mongo-initdb-root-password}' | base64 --decode
 ```
@@ -61,7 +61,8 @@ kubectl replace -f new_secrets
 ```
 In case of a rollback, the old secrets can be restored by executing:
 ```
-kubectl replace -f original_secrets
+kubectl delete -f new_secrets
+kubectl apply -f original_secrets
 ```
 ### Restarting services
 In order to finish the migration, the relevant pods which use the MongoDB need to be restarted. This can be done by scaling the relevant deployments down and up again i.e.:
@@ -73,11 +74,11 @@ kubectl scale deploy service-alexa-management --replicas=<number of desired repl
 ## Upgrade deployment
 
 ```
-helm -n multi-replica-mongodb upgrade mongodb bitnami/mongodb --values values.yaml
+helm -n mongodb upgrade mongodb bitnami/mongodb --values values.yaml
 ```
 
 ## Uninstall
 
 ```
-helm -n multi-replica-mongodb uninstall mongodb
+helm -n mongodb uninstall mongodb
 ```
