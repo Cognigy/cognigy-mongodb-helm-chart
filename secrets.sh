@@ -22,9 +22,9 @@ main() {
         exit 1
     fi
 
-    echo -n "Checking for active Kubernetes cluster..."
+    echo "Checking for active Kubernetes cluster..."
     if ! (kubectl get nodes > /dev/null); then
-        echo -n "No active Kubernetes cluster found. Please activate the appropriate kubeconfig. Exiting..."
+        echo "No active Kubernetes cluster found. Please activate the appropriate kubeconfig. Exiting..."
         exit 1
     fi
 
