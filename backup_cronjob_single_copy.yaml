@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app.kubernetes.io/component: mongodb
+    app.kubernetes.io/instance: mongodb
+    app.kubernetes.io/name: mongodb
+  name: mongodb-backup
+  namespace: default
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 8Gi
+---
+apiVersion: batch/v1beta1 # should be changed to batch/v1 with a Kubernetes upgrade
+kind: CronJob
+metadata:
+  labels:
+    app.kubernetes.io/component: mongodb
+    app.kubernetes.io/instance: mongodb
+    app.kubernetes.io/name: mongodb
+  name: mongodb-backup
+  namespace: default
+spec:
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  schedule: "15 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          automountServiceAccountToken: false
+          securityContext:
+            fsGroup: 1001
+          containers:
+          - name: mongodb-backup
+            image: bitnami/mongodb:4.4.6-debian-10-r8
+            securityContext:
+              runAsUser: 1001
+              runAsGroup: 1001
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true 
+              runAsNonRoot: true
+              privileged: false
+              capabilities:
+                drop:
+                  - ALL
+            command:
+            - "/bin/sh"
+            - "-c"
+            - "/opt/bitnami/mongodb/bin/mongodump --archive=/data/db/mongodump.gz --authenticationDatabase admin --host mongodb-0.mongodb-headless.mongodb.svc.cluster.local:27017,mongodb-1.mongodb-headless.mongodb.svc.cluster.local:27017,mongodb-2.mongodb-headless.mongodb.svc.cluster.local:27017 -u admin -p $MONGO_ROOT_PASSWORD --gzip -vvv"
+            env:
+              - name: MONGO_ROOT_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: cognigy-mongo-server
+                    key: mongo-initdb-root-password            
+            volumeMounts:
+            - name: mongodb-backup
+              mountPath: /data/db
+          restartPolicy: OnFailure
+          volumes:
+            - name: mongodb-backup
+              persistentVolumeClaim:
+                claimName: mongodb-backup

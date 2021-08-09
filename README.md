@@ -4,6 +4,11 @@
 
 This is the Helm setup for the Multi-Replica MongoDB architecture. It uses the [MongoDB chart by Bitnami](https://github.com/bitnami/charts/tree/master/bitnami/mongodb). MongoDB is set up as a 3 node replica set with an additional arbiter. The 3 nodes are distributed throughout different availability zones (i.e. eu-central-1a, eu-central-1b and eu-central-1b). To accomplish this, the Kubernetes label `topology.kubernetes.io/zone` is used, which is one of the [well-known labels](https://kubernetes.io/docs/reference/labels-annotations-taints/#topologykubernetesiozone) and is therefore present in all major installers or managed services. The setup uses an anti-affinity to accomplish this behavior: if the label `uniquezone=set` is found for a pod, there cannot be another MongoDB pod with this label in the same availability zone.
 
+### Monitoring
+The chart natively supports monitoring through Prometheus. The service monitor is enabled in the values which allows for an automatic detection of the MongoDB metrics endpoints by Prometheues. Also, Prometheus rules can be enabled for alerting in the values. A matching Grafana dashboard can be found [here](https://grafana.com/grafana/dashboards/7353).
+
+### Backups
+
 ## Migration
 The migration process from a single node setup to a replica one involves several steps. These are described in the following paragraphs. This guide assumes the "old" MongoDB server to be deployed in the `default` namespace and will install the "new" MongoDB ReplicaSet into the namespace `mongodb`.
 
@@ -82,3 +87,6 @@ helm -n mongodb upgrade mongodb bitnami/mongodb --values values.yaml
 ```
 helm -n mongodb uninstall mongodb
 ```
+
+## Security
+The whole setup runs as a non-root 

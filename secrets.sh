@@ -45,6 +45,7 @@ main() {
     done; 
 
     echo "Done."
+    echo "You can now apply these secrets by executing kubectl replface -f new_secrets/"
 }
 
 
