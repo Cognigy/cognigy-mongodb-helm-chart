@@ -1,0 +1,98 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app.kubernetes.io/component: mongodb
+    app.kubernetes.io/instance: mongodb
+    app.kubernetes.io/name: mongodb
+  name: mongodb-backup
+  namespace: default
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 8Gi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/component: mongodb
+    app.kubernetes.io/instance: mongodb
+    app.kubernetes.io/name: mongodb
+  name: mongodb-backup-script
+  namespace: default
+data:
+  dump-mongodb.sh: |-
+    #!/usr/bin/env bash
+
+    set -o errexit
+    set -o nounset
+    set -o pipefail
+
+    RETENTION='7'
+    DATE=$(date +"%m_%d_%Y")
+    HOSTS="mongodb-0.mongodb-headless.mongodb.svc.cluster.local:27017,mongodb-1.mongodb-headless.mongodb.svc.cluster.local:27017,mongodb-2.mongodb-headless.mongodb.svc.cluster.local:27017" 
+
+    find /data/db/ -mtime +$RETENTION -type f -delete
+    /opt/bitnami/mongodb/bin/mongodump --archive=/data/db/mongodump_$DATE.gz --authenticationDatabase admin -u admin -p $MONGO_ROOT_PASSWORD --host ${HOSTS} --gzip -vvv
+
+---
+apiVersion: batch/v1beta1 # should be changed to batch/v1 with a Kubernetes upgrade
+kind: CronJob
+metadata:
+  labels:
+    app.kubernetes.io/component: mongodb 
+    app.kubernetes.io/instance: mongodb
+    app.kubernetes.io/name: mongodb
+  name: mongodb-backup
+  namespace: default
+spec:
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  schedule: "1 1 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          automountServiceAccountToken: false
+          securityContext:
+            fsGroup: 1001
+          containers:
+          - name: mongodb-backup
+            image: bitnami/mongodb:4.4.6-debian-10-r8
+            securityContext:
+              runAsUser: 1001
+              runAsGroup: 1001
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true 
+              runAsNonRoot: true
+              privileged: false
+              capabilities:
+                drop:
+                  - ALL
+            command:
+            - "/bin/sh"
+            - "-c"
+            - "/scripts/dump-mongodb.sh"
+            env:
+              - name: MONGO_ROOT_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: cognigy-mongo-server
+                    key: mongo-initdb-root-password            
+            volumeMounts:
+            - name: mongodb-backup
+              mountPath: /data/db
+            - mountPath: "/scripts"
+              name: script-mongodump
+          restartPolicy: OnFailure
+          volumes:
+            - name: mongodb-backup
+              persistentVolumeClaim:
+                claimName: mongodb-backup
+            - name: script-mongodump
+              configMap:
+                  defaultMode: 0755
+                  name: mongodb-backup-script

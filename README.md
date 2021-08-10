@@ -8,6 +8,10 @@ This is the Helm setup for the Multi-Replica MongoDB architecture. It uses the [
 The chart natively supports monitoring through Prometheus. The service monitor is enabled in the values which allows for an automatic detection of the MongoDB metrics endpoints by Prometheues. Also, Prometheus rules can be enabled for alerting in the values. A matching Grafana dashboard can be found [here](https://grafana.com/grafana/dashboards/7353).
 
 ### Backups
+Two Kubernetes manifests for backups are provided in this repository. Both do daily dumps of all databases and write the backup to `/data/db/` on the PVC `mongodb-backup`. The backups are gzip-compressed. Make sure to adjust the values in the manifests as needed, i.e. the PVC size, the backup schedule, the connection string etc.
+* `backup_cronjob_single_copy.yaml` creates a daily backup with the name `mongodump.gz`. Therefore it is overwritten daily and only the last dump is kept. If a longer retention is needed, snapshots of this volume should be taken with a certain schedule.
+* `backup_cronjob_retention.yaml` creates daily backups with the name `mongodump_DATE.gz` and keeps them for a retention period of X days. This value can be adjusted in the script.
+All backups are full dumps since MongoDB doesn't support incremental backups.
 
 ## Migration
 The migration process from a single node setup to a replica one involves several steps. These are described in the following paragraphs. This guide assumes the "old" MongoDB server to be deployed in the `default` namespace and will install the "new" MongoDB ReplicaSet into the namespace `mongodb`.
