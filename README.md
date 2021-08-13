@@ -91,6 +91,3 @@ helm -n mongodb upgrade mongodb bitnami/mongodb --values values.yaml
 ```
 helm -n mongodb uninstall mongodb
 ```
-
-## Security
-The whole setup runs as a non-root 
