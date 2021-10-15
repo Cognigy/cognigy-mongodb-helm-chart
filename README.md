@@ -26,7 +26,7 @@ Afterwards, the new setup can be deployed via Helm:
 
 ```
 helm repo add bitnami https://charts.bitnami.com/bitnami
-helm -n mongodb install mongodb bitnami/mongodb --values values.yaml
+helm -n mongodb install mongodb bitnami/mongodb --values values.yaml --create-namespace
 ```
 To verify all pods are in a ready state, you can execute:
 ```
@@ -49,20 +49,27 @@ After attaching to the pod, the following command can be used to take a dump of 
 ```
 mongodump --archive --authenticationDatabase admin -u admin -p <password> --host "mongo-server.default.svc:27017" | mongorestore --host "mongodb-0.mongodb-headless.mongodb.svc.cluster.local:27017,mongodb-1.mongodb-headless.mongodb.svc.cluster.local:27017,mongodb-2.mongodb-headless.mongodb.svc.cluster.local:27017" --authenticationDatabase admin -u root -p <password> --archive --drop
 ```
-Please be aware that the host addresses might be different depending on the names and namespaces used. Therefore adjust them accordingly, depending on the setup. The syntax for services is as follows `<service>.<namespace>.svc`. 
+Please be aware that the host addresses might be different depending on the names and namespaces used. Therefore adjust them accordingly, depending on the setup. The syntax for services is as follows `<service>.<namespace>.svc`.
 This will use the stdout to dump and restore instead of saving it on disk. Therefore you don't need a volume where you can store the whole backup. But make sure to have enough disk space available on the new setup to restore the dump.
 Otherwise you can also remove the pipe in between the two commands and specify a location where to save the dump by adding i.e. `--archive=/tmp/mongodump`.
 
 ### Secrets adjustment
 To access the MongoDB setup, several secrets are used which contain a connection string. If the new cluster should be used, these need to be adjusted to point to the new cluster with the same credentials. To automate this process, a script can be found in this repository. After downloading it needs to be made executable by running
 ```
-chmod +x secrets-sh
+chmod +x secrets.sh
 ```
 and can thereafter be executed.
 ```
 ./secrets.sh
 ```
 It will ask for the old MongoDB host, i.e. `mongo-server:27017` and for a replacement containing the new hosts, i.e. `mongodb-0.mongodb-headless.mongodb.svc.cluster.local:27017,mongodb-1.mongodb-headless.mongodb.svc.cluster.local:27017,mongodb-2.mongodb-headless.mongodb.svc.cluster.local:27017`.
+
+```bash
+./secrets.sh
+Enter current MongoDB host: mongo-server:27017
+Enter new MongoDB host(s): mongodb-0.mongodb-headless.mongodb.svc.cluster.local:27017,mongodb-1.mongodb-headless.mongodb.svc.cluster.local:27017,mongodb-2.mongodb-headless.mongodb.svc.cluster.local:27017
+```
+
 The script will store all relevant old secrets in a folder called `original_secrets` and the adjusted ones in a folder called `new_secrets`.
 After executing the script the new secrets need to be applied to the cluster:
 ```

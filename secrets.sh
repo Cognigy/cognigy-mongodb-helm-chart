@@ -42,10 +42,10 @@ main() {
 
         yq e ".data.connection-string = \"$connection_string_new\"" original_secrets/"$filename" > new_secrets/"$filename"
 
-    done; 
+    done;
 
     echo "Done."
-    echo "You can now apply these secrets by executing kubectl replface -f new_secrets/"
+    echo "You can now apply these secrets by executing 'kubectl replace -f new_secrets/'"
 }
 
 
