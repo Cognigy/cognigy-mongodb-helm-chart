@@ -30,3 +30,4 @@ This file contains the tasks and plans for the project, from both side Cognigy a
       - Errors
       - Daily report
 - Provide a loadtest
+- Metric exporter does not work. From Dat's check, the username/password environment variables are not set correctly in the exporter container: even though `metrics.username` and `metrics.password` are set, `MONGODB_METRICS_USERNAME` and `MONGODB_METRICS_PASSWORD` are not set.
