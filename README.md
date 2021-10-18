@@ -26,7 +26,7 @@ Afterwards, the new setup can be deployed via Helm:
 
 ```
 helm repo add bitnami https://charts.bitnami.com/bitnami
-helm -n mongodb install mongodb bitnami/mongodb --values values.yaml --create-namespace
+helm upgrade --install -n mongodb mongodb bitnami/mongodb --values values.yaml --create-namespace
 ```
 To verify all pods are in a ready state, you can execute:
 ```
