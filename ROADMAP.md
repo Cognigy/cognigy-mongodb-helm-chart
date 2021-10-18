@@ -42,4 +42,6 @@ This file contains the tasks and plans for the project, from both side Cognigy a
       - Daily report
         - cc: what do you mean by that? A summary of the errors that occured during the day? MongoDB doesn't provide any functionality like that natively but probably through a monitoring system you could generate something.
 - Provide a loadtest
-  - I think the best loadtest would be running a loadtest on the Cognigy platform with the Multi-Replica MongoDB as database. Otherwise you could provide us sample data and frequent load-intensive queries the platform executes.
+  - cc: I think the best loadtest would be running a loadtest on the Cognigy platform with the Multi-Replica MongoDB as database. Otherwise you could provide us sample data and frequent load-intensive queries the platform executes.
+- Metric exporter does not work. From Dat's check, the username/password environment variables are not set correctly in the exporter container: even though `metrics.username` and `metrics.password` are set, `MONGODB_METRICS_USERNAME` and `MONGODB_METRICS_PASSWORD` are not set.
+  - cc: I just checked the setup on the loadtest cluster and the metrics exporter works correctly and is connected to the database. The variables are also set corretly. Why do you think it doesn't work?
