@@ -4,6 +4,8 @@ This file contains the tasks and plans for the project, from both side Cognigy a
 ## Cognigy
 
 - [ ] Loadtest the new MongoDB setup
+  - AWS/EKS
+  - AKS
 - [ ] Test the data migration from the old setup to the new one
 - [ ] Plan the migration for:
   - New customers
@@ -27,3 +29,4 @@ This file contains the tasks and plans for the project, from both side Cognigy a
       - Unavailable nodes
       - Errors
       - Daily report
+- Provide a loadtest
