@@ -18,3 +18,11 @@ This file contains the tasks and plans for the project, from both side Cognigy a
   - More example on migration:
     - Full command on `--archive=/tmp/mongodump`
     - Expected migration speed (e.g. xx MBps)
+  - Basic operational activities guideline:
+    - Monitor and observe cluster health
+    - Management UI (if available)
+    - Logging and alerting
+      - Slow queries
+      - Unavailable nodes
+      - Errors
+      - Daily report
