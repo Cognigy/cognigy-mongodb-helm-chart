@@ -26,12 +26,16 @@ Afterwards, the new setup can be deployed via Helm:
 
 ```
 helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo update
 helm upgrade --install -n mongodb mongodb bitnami/mongodb --values values.yaml --create-namespace
 ```
+
 To verify all pods are in a ready state, you can execute:
+
 ```
 kubectl get pods -n mongodb
 ```
+
 You should see 3 pods in a ready state, called mongodb-0, mongodb-1 and mongodb-2. These are the 3 nodes of the cluster.
 
 ### Data migration
