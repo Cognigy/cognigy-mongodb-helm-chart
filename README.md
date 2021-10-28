@@ -39,7 +39,7 @@ kubectl get pods -n mongodb
 You should see 3 pods in a ready state, called mongodb-0, mongodb-1 and mongodb-2. These are the 3 nodes of the cluster.
 
 ### Data migration
-To migrate the actual data you can either use one of the MongoDB pods or run a seperate one.
+To migrate the actual data you can either use one of the MongoDB pods or run a seperate one. Please, stop the running cognigy installation before start the migration.
 To use one of the MongoDB pods:
 ```
 kubectl exec -it mongodb-0 -n mongodb -- bash
