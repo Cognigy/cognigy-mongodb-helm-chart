@@ -42,7 +42,8 @@ You should see 3 pods in a ready state, called mongodb-0, mongodb-1 and mongodb-
 To migrate the actual data you can either use one of the MongoDB pods or run a seperate one. Please, stop the running cognigy installation before start the migration. To do so 
 
 ```
-for i in $(kubectl get deployment --namespace default --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}'|grep service-)do
+for i in $(kubectl get deployment --namespace default --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}'|grep service-)
+do
     kubectl --namespace default scale --replicas=0 deployment $i
 done
 ```
