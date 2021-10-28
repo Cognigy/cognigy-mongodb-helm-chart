@@ -78,6 +78,7 @@ and can thereafter be executed.
 ```
 It will ask for the old MongoDB host, i.e. `mongo-server:27017` and for a replacement containing the new hosts, i.e. `mongodb-0.mongodb-headless.mongodb.svc.cluster.local:27017,mongodb-1.mongodb-headless.mongodb.svc.cluster.local:27017,mongodb-2.mongodb-headless.mongodb.svc.cluster.local:27017`.
 
+> Please install `YQ` before running the script 
 ```bash
 ./secrets.sh
 Enter current MongoDB host: mongo-server:27017
