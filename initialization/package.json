@@ -1,6 +1,6 @@
 {
     "name": "initialization",
-    "version": "2.0.0",
+    "version": "2.2.0",
     "description": "Automates the process of creating random secrets, blueprints for k8s secret objects and a database initialization snippet for MongoDB.",
     "main": "build/index.js",
     "bin": "build/index.js",
@@ -26,7 +26,7 @@
         "@types/command-line-args": "^5.0.0",
         "@types/command-line-usage": "^5.0.1",
         "@types/js-yaml": "^3.12.5",
-        "@types/node": "^12.20.17",
+        "@types/node": "^12.12.62",
         "pkg": "^4.4.9",
         "typescript": "^3.9.7"
     }
