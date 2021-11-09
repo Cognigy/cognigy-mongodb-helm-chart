@@ -1,1 +1,0 @@
-{"version":3,"file":"version.js","sourceRoot":"","sources":["../../src/entrypoints/version.ts"],"names":[],"mappings":";;;AAAA,kBAAkB;AAClB,MAAM,WAAW,GAAG,OAAO,CAAC,oBAAoB,CAAC,CAAC;AAElD,SAAgB,WAAW;IAC1B,OAAO,CAAC,GAAG,CAAC,8CAA8C,WAAW,CAAC,OAAO,EAAE,CAAC,CAAC;IAEjF,OAAO,CAAC,IAAI,CAAC,CAAC,CAAC,CAAC;AACjB,CAAC;AAJD,kCAIC"}
