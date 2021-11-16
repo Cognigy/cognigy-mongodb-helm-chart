@@ -16,12 +16,14 @@ All backups are full dumps since MongoDB doesn't support incremental backups.
 ## Migration
 The migration process from a single node setup to a replica one involves several steps. These are described in the following paragraphs. This guide assumes the "old" MongoDB server to be deployed in the `default` namespace and will install the "new" MongoDB ReplicaSet into the namespace `mongodb`.
 
+
 ### Deployment
 To deploy the new MongoDB setup adjust the values accordingly in the `values.yaml` file. Most likely you will just have to adjust the root password for the database. Also, the size of the Persistent Volume Claim should be adjusted as needed. In order to have it set to the same one as before you can find out the current one by executing the following on the appropriate Kubernetes cluster:
 ```
 kubectl get secret cognigy-mongo-server -ojsonpath='{.data.mongo-initdb-root-password}' | base64 --decode
 ```
-The `rootPassword` value in the `auth` section should be set to this value. Also a `replicaSetKey` should be set to a secure value.
+The `rootPassword` value in the `auth` section should be set to this value. Also a `replicaSetKey` should be set to a secure value. Do not forget to setup the password for metrics as well.
+
 Afterwards, the new setup can be deployed via Helm:
 
 ```
