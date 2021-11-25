@@ -75,18 +75,18 @@ nodeAffinityPreset:
   key: ""
   values: []
 affinity:
-  podAntiAffinity: 
-    requiredDuringSchedulingIgnoredDuringExecution: 
-      - labelSelector: 
-          matchExpressions: 
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
             - key: "uniquezone"
               operator: In
-              values: 
+              values:
               - "set"
         topologyKey: "topology.kubernetes.io/zone"
 nodeSelector: {}
 tolerations: []
-podLabels: 
+podLabels:
   uniquezone: set
 podAnnotations: {}
 priorityClassName: ""
@@ -388,9 +388,9 @@ metrics:
     failureThreshold: 3
     successThreshold: 1
   serviceMonitor:
-    enabled: false
+    enabled: true
     namespace: ""
-    interval: 30s
+    interval: 60s
     scrapeTimeout: ""
     relabellings: []
     metricRelabelings: []
