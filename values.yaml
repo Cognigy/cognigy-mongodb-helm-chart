@@ -18,7 +18,7 @@ diagnosticMode:
 image:
   registry: docker.io
   repository: bitnami/mongodb
-  tag: 4.4.9-debian-10-r0
+  tag: 4.2.5-debian-10-r54
   pullPolicy: IfNotPresent
   pullSecrets: []
   debug: false

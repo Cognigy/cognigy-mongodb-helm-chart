@@ -29,7 +29,7 @@ Afterwards, the new setup can be deployed via Helm:
 ```
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo update
-helm upgrade --install -n mongodb mongodb bitnami/mongodb --values values.yaml --create-namespace
+helm upgrade --install -n mongodb mongodb ./charts/bitnami/mongodb --values values.yaml --create-namespace
 ```
 
 To verify all pods are in a ready state, you can execute:
@@ -41,7 +41,7 @@ kubectl get pods -n mongodb
 You should see 3 pods in a ready state, called mongodb-0, mongodb-1 and mongodb-2. These are the 3 nodes of the cluster.
 
 ### Data migration
-To migrate the actual data you can either use one of the MongoDB pods or run a seperate one. Please, stop the running cognigy installation before start the migration. To do so 
+To migrate the actual data you can either use one of the MongoDB pods or run a seperate one. Please, stop the running cognigy installation before start the migration. To do so
 
 ```
 for i in $(kubectl get deployment --namespace default --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}'|grep service-)
@@ -80,7 +80,7 @@ and can thereafter be executed.
 ```
 It will ask for the old MongoDB host, i.e. `mongo-server:27017` and for a replacement containing the new hosts, i.e. `mongodb-0.mongodb-headless.mongodb.svc.cluster.local:27017,mongodb-1.mongodb-headless.mongodb.svc.cluster.local:27017,mongodb-2.mongodb-headless.mongodb.svc.cluster.local:27017`.
 
-> Please install `YQ` before running the script 
+> Please install `YQ` before running the script
 ```bash
 ./secrets.sh
 Enter current MongoDB host: mongo-server:27017
