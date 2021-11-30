@@ -4,6 +4,8 @@
 
 This is the Helm setup for the Multi-Replica MongoDB architecture. It uses the [MongoDB chart by Bitnami](https://github.com/bitnami/charts/tree/master/bitnami/mongodb). MongoDB is set up as a 3 node replica set. The 3 nodes are distributed throughout different availability zones (i.e. eu-central-1a, eu-central-1b and eu-central-1b). To accomplish this, the Kubernetes label `topology.kubernetes.io/zone` is used, which is one of the [well-known labels](https://kubernetes.io/docs/reference/labels-annotations-taints/#topologykubernetesiozone) and is therefore present in all major installers or managed services. The setup uses an anti-affinity to accomplish this behavior: if the label `uniquezone=set` is found for a pod, there cannot be another MongoDB pod with this label in the same availability zone.
 
+Because Cognigy is using MongoDB v4.2.5, some customizations are done, so the chart is forked and modified in this repository.
+
 ### Monitoring
 The chart natively supports monitoring through Prometheus. The service monitor is enabled in the values which allows for an automatic detection of the MongoDB metrics endpoints by Prometheues. Also, Prometheus rules can be enabled for alerting in the values. A matching Grafana dashboard can be found [here](https://grafana.com/grafana/dashboards/7353).
 
@@ -27,8 +29,6 @@ The `rootPassword` value in the `auth` section should be set to this value. Also
 Afterwards, the new setup can be deployed via Helm:
 
 ```
-helm repo add bitnami https://charts.bitnami.com/bitnami
-helm repo update
 helm upgrade --install -n mongodb mongodb ./charts/bitnami/mongodb --values values.yaml --create-namespace
 ```
 
