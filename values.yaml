@@ -109,8 +109,12 @@ containerSecurityContext:
     drop:
       - ALL
 resources:
-  limits: {}
-  requests: {}
+  limits:
+    memory: "5Gi"
+    cpu: "2"
+  requests:
+    memory: "2Gi"
+    cpu: "1"
 livenessProbe:
   enabled: true
   initialDelaySeconds: 30
@@ -191,7 +195,7 @@ persistence:
   storageClass: ""
   accessModes:
     - ReadWriteOnce
-  size: 8Gi
+  size: 50Gi
   annotations: {}
   mountPath: /bitnami/mongodb
   subPath: ""
@@ -347,7 +351,7 @@ hidden:
     storageClass: ""
     accessModes:
       - ReadWriteOnce
-    size: 20Gi
+    size: 8Gi
     annotations: {}
     mountPath: /bitnami/mongodb
     subPath: ""
