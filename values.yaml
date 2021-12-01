@@ -18,7 +18,7 @@ diagnosticMode:
 image:
   registry: docker.io
   repository: bitnami/mongodb
-  tag: 4.4.9-debian-10-r0
+  tag: 4.2.5-debian-10-r54
   pullPolicy: IfNotPresent
   pullSecrets: []
   debug: false
@@ -27,10 +27,11 @@ architecture: replicaset
 useStatefulSet: true
 auth:
   enabled: true
+  rootUser: ""
   rootPassword: "" # enter password
-  username: ""
-  password: ""
-  database: ""
+  usernames: []
+  passwords: []
+  databases: []
   replicaSetKey: "" # enter rsKey
   existingSecret: ""
 tls:
@@ -54,6 +55,8 @@ disableSystemLog: false
 disableJavascript: false
 enableJournal: true
 configuration: ""
+replicaSetConfigurationSettings:
+  enabled: false
 existingConfigmap: ""
 initdbScripts: {}
 initdbScriptsConfigMap: ""
@@ -98,6 +101,7 @@ podSecurityContext:
   sysctls: []
 containerSecurityContext:
   enabled: true
+  runAsUser: 1001
   allowPrivilegeEscalation: false
   runAsNonRoot: true
   privileged: false
@@ -105,8 +109,12 @@ containerSecurityContext:
     drop:
       - ALL
 resources:
-  limits: {}
-  requests: {}
+  limits:
+    memory: "5Gi"
+    cpu: "2"
+  requests:
+    memory: "2Gi"
+    cpu: "1"
 livenessProbe:
   enabled: true
   initialDelaySeconds: 30
@@ -187,7 +195,7 @@ persistence:
   storageClass: ""
   accessModes:
     - ReadWriteOnce
-  size: 8Gi
+  size: 50Gi
   annotations: {}
   mountPath: /bitnami/mongodb
   subPath: ""
@@ -388,7 +396,7 @@ metrics:
     failureThreshold: 3
     successThreshold: 1
   serviceMonitor:
-    enabled: true
+    enabled: false
     namespace: ""
     interval: 60s
     scrapeTimeout: ""
