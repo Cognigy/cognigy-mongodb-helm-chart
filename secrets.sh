@@ -11,7 +11,13 @@ main() {
     local connection_string_new
     local mongo_host
     local mongo_host_new
-    local secrets="cognigy-service-ai cognigy-service-alexa-management cognigy-service-analytics-collector-provider cognigy-service-analytics-conversation-collector-provider cognigy-service-api cognigy-service-custom-modules cognigy-service-function-scheduler cognigy-service-handover cognigy-service-journeys cognigy-service-logs cognigy-service-nlp cognigy-service-profiles cognigy-service-resources cognigy-service-security cognigy-service-task-manager cognigy-service-trainer"
+    local liveagent=`kubectl get secrets -n default | grep live | wc -l`
+    if [[ $liveagent -eq 2 ]]
+    then 
+      local secrets="cognigy-service-ai cognigy-service-alexa-management cognigy-service-analytics-collector-provider cognigy-service-analytics-conversation-collector-provider cognigy-service-api cognigy-service-custom-modules cognigy-service-function-scheduler cognigy-service-handover cognigy-service-journeys cognigy-service-logs cognigy-service-nlp cognigy-service-profiles cognigy-service-resources cognigy-service-security cognigy-service-task-manager cognigy-service-trainer live-agent-api"
+    else
+      local secrets="cognigy-service-ai cognigy-service-alexa-management cognigy-service-analytics-collector-provider cognigy-service-analytics-conversation-collector-provider cognigy-service-api cognigy-service-custom-modules cognigy-service-function-scheduler cognigy-service-handover cognigy-service-journeys cognigy-service-logs cognigy-service-nlp cognigy-service-profiles cognigy-service-resources cognigy-service-security cognigy-service-task-manager cognigy-service-trainer"
+    fi
 
     read -rp "Enter current MongoDB host: " mongo_host
     read -rp "Enter new MongoDB host(s): " mongo_host_new
