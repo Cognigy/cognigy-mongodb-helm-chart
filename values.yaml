@@ -27,7 +27,7 @@ architecture: replicaset
 useStatefulSet: true
 auth:
   enabled: true
-  rootUser: ""
+  rootUser: "root"
   rootPassword: "" # enter password
   usernames: []
   passwords: []
@@ -192,7 +192,7 @@ externalAccess:
 persistence:
   enabled: true
   existingClaim: ""
-  storageClass: ""
+  storageClass: "mongodb"
   accessModes:
     - ReadWriteOnce
   size: 200Gi
@@ -212,7 +212,7 @@ rbac:
   role:
     rules: []
 podSecurityPolicy:
-  create: true
+  create: false
   allowPrivilegeEscalation: false
   privileged: false
   spec: {}
@@ -348,7 +348,7 @@ hidden:
     maxUnavailable: ""
   persistence:
     enabled: true
-    storageClass: ""
+    storageClass: "mongodb"
     accessModes:
       - ReadWriteOnce
     size: 8Gi
@@ -366,9 +366,9 @@ metrics:
     tag: 0.20.7-debian-10-r16
     pullPolicy: IfNotPresent
     pullSecrets: []
-  username: "admin"
+  username: "root"
   password: "" # enter password
-  extraFlags: ""
+  extraFlags: "--compatible-mode"
   extraUri: ""
   resources:
     limits: {}
@@ -396,7 +396,7 @@ metrics:
     failureThreshold: 3
     successThreshold: 1
   serviceMonitor:
-    enabled: false
+    enabled: true
     namespace: ""
     interval: 60s
     scrapeTimeout: ""
