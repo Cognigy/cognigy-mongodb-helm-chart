@@ -348,7 +348,7 @@ hidden:
     maxUnavailable: ""
   persistence:
     enabled: true
-    storageClass: "mongodb"
+    storageClass: ""
     accessModes:
       - ReadWriteOnce
     size: 8Gi
@@ -396,7 +396,7 @@ metrics:
     failureThreshold: 3
     successThreshold: 1
   serviceMonitor:
-    enabled: true
+    enabled: false
     namespace: ""
     interval: 60s
     scrapeTimeout: ""
