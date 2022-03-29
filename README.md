@@ -35,21 +35,17 @@ You need to set at least following parameters for this Helm release:
         rootPassword: "" # enter password
 
    ```
-2. **Set the same root password in `metrics` section via `metrics.password` variable** for prometheus metrics container to be able to connect to the database, otherwise the deployment will crash. 
-3. If you migrate to Helm chart from the previous installation, you can get the existing password with:
-    ```
-    kubectl get secret cognigy-mongo-server -ojsonpath='{.data.mongo-initdb-root-password}' | base64 --decode
-    ```
-4. Create another secure password and set it for replica set in `auth.replicaSetKey` variable. This password is used to authenticate replicas in their internal communication.
-5. Set the `size` of the MongoDB persistent volume under `persistence` according to your requirements. We set it recommended value of `50GB` for Cognigy.AI installation by default.
-6. OPTIONAL: configure other parameters in `values.yaml` as required. 
+2. **Set the same root password in `metrics` section via `metrics.password` variable** for prometheus metrics container to be able to connect to the database, otherwise the deployment will crash.
+3.f Create another secure password and set it for replica set in `auth.replicaSetKey` variable. This password is used to authenticate replicas in their internal communication.
+4. Set the `size` of the MongoDB persistent volume under `persistence` according to your requirements. We set it recommended value of `50GB` for Cognigy.AI installation by default.
+5. OPTIONAL: configure other parameters in `values.yaml` as required. 
 
 ## Installing the Chart
 After the parameters are set a new release can be deployed via Helm into `mongodb` namespace, use proper values.yaml file if you copied and renamed it before:
 ```
 helm upgrade --install -n mongodb mongodb ./charts/bitnami/mongodb --values values.yaml --create-namespace
 ```
-To verify all pods are in a ready state, you can execute:
+Pods are created one by one, so you need to wait a bit. To verify all pods are in a ready state, you can execute:
 ```
 kubectl get pods -n mongodb
 ```
@@ -58,7 +54,7 @@ You should see 3 replica of `mongodb` pods in a ready state in `mongodb` namespa
 ## Monitoring
 The chart natively supports monitoring of MongoDB with Prometheus metrics. `metrics` container is enabled by default in the corresponding section in `values.yaml`. Prometheus service monitor is disabled by default via `serviceMonitor` parameter. If there is a Prometheus instance in the cluster, you can enable its automatic discovery by setting `serviceMonitor.enabled` variable to `true`. Additionally, Prometheus rules can be enabled for alerting with `prometheusRule` parameter. A matching Grafana dashboard can be found [here](https://grafana.com/grafana/dashboards/7353).
 
-## Upgrading    Helm Release
+## Upgrading Helm Release
 ```
 helm -n mongodb upgrade mongodb bitnami/mongodb --values values.yaml
 ```
