@@ -2,16 +2,16 @@
 This Helm Chart installs a Multi-Replica MongoDB setup with High Availability (HA) support across three availability zones. It is based on [MongoDB chart by Bitnami](https://github.com/bitnami/charts/tree/master/bitnami/mongodb) and installs MongoDB v4.2.5 compatible with Cognigy.AI
 
 ## Prerequisites
-- Kubernetes v1.19-1.21 Cluster on AWS or Azure 
+- Kubernetes v1.19-1.21 Cluster on AWS EKS or Azure AKS 
 - kubectl utility connected to the kubernetes cluster
-- Helm 3.2.0+
+- Helm 3.8.0+
 - Persistent Volume provisioner in the underlying infrastructure
 
 ## Configuration 
 ### Storage Class
 Cognigy.AI requires certain performance requirements for MongoDB storage. To meet such requirements and to deploy MongoDB on common public cloud providers you need to create `mongodb` StorageClass accordingly. Manifests for storage classes are located in `cloud-providers` folder. E.g. for AWS create `mongodb` StorageClass with:
    ```
-   kubeclt apply -f cloud-providers/aws/mongo-server.yaml
+   kubeclt apply -f cloud-providers/aws/mongodb.yaml
    ```
 ### Namespace
 This Installation guide assumes that MongoDB setup is deployed into `mongodb` namespace. Create `mongodb` namespace with:
@@ -27,7 +27,7 @@ The chart is configured to install MongoDB replicas across three availability zo
 To deploy a new MongoDB setup adjust the values accordingly in the `values.yaml` file. You can also copy the default `values.yaml` file into another file and name it accordingly. e.g. `my-mongodb-values.yaml`. In this case you need to set all the following configuration parameters and apply following commands to this file. For a full description of `values.yaml` parameters see [official Bitnami documentation](https://github.com/bitnami/charts/tree/master/bitnami/mongodb)
 
 You need to set at least following parameters for this Helm release:
-1. Set root user password. Create a secure password and set it in `values.yaml` unnder `auth.rootPassword` variable:
+1. Set root user password. Create a secure password and set it in `values.yaml` under `auth.rootPassword` variable:
    ```
     auth:
         enabled: true
@@ -39,6 +39,12 @@ You need to set at least following parameters for this Helm release:
 3.f Create another secure password and set it for replica set in `auth.replicaSetKey` variable. This password is used to authenticate replicas in their internal communication.
 4. Set the `size` of the MongoDB persistent volume under `persistence` according to your requirements. We set it recommended value of `50GB` for Cognigy.AI installation by default.
 5. OPTIONAL: configure other parameters in `values.yaml` as required. 
+
+### Development Environment
+For testing and development purposes on clusters without availability zones you can install a single replica MongoDB instance. For this you need to set following parameters (see `values_dev.yaml` as an example):
+1. `architecture: standalone`
+2. `replicaCount: 1`
+3. You will also need to modify MongoDB connection string in Cognigy.AI Helm chart later on.
 
 ## Installing the Chart
 After the parameters are set a new release can be deployed via Helm into `mongodb` namespace, use proper values.yaml file if you copied and renamed it before:
@@ -63,6 +69,7 @@ helm -n mongodb upgrade mongodb bitnami/mongodb --values values.yaml
 ```
 helm -n mongodb uninstall mongodb
 ```
+## Cleaning up
 Please keep in mind that Persistent Volume Claims (PVC) are not removed when you delete the Helm release. To fully remove them you need to run the following command. **IMPORTANT: If you run this command, all data persisted in MongoDB will be lost!**
 ```
 kubectl delete -n=mongodb pvc --all
