@@ -1,0 +1,12 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: mongodb
+provisioner: kubernetes.io/aws-ebs
+allowVolumeExpansion: true
+volumeBindingMode: WaitForFirstConsumer
+parameters:
+  type: io1
+  iopsPerGB: "20"
+  encrypted: "true"
+  fsType: ext4
