@@ -11,4 +11,4 @@ parameters:
   type: io1
 provisioner: kubernetes.io/aws-ebs
 reclaimPolicy: Delete
-volumeBindingMode: Immediate
+volumeBindingMode: WaitForFirstConsumer
