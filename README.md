@@ -2,7 +2,7 @@
 This Helm Chart installs a Multi-Replica MongoDB setup with High Availability (HA) support across three availability zones. It is based on [MongoDB chart by Bitnami](https://github.com/bitnami/charts/tree/master/bitnami/mongodb) and installs MongoDB v4.2.5 compatible with Cognigy.AI
 
 ## Prerequisites
-- Kubernetes v1.19-1.21 Cluster on AWS EKS or Azure AKS 
+- Kubernetes v1.19-1.22 Cluster on AWS EKS or Azure AKS 
 - kubectl utility connected to the kubernetes cluster
 - Helm 3.8.0+
 - Persistent Volume provisioner in the underlying infrastructure
@@ -41,10 +41,10 @@ You need to set at least following parameters for this Helm release:
 5. OPTIONAL: configure other parameters in `values.yaml` as required. 
 
 ### Development Environment
-For testing and development purposes on clusters without availability zones you can install a single replica MongoDB instance. For this you need to set following parameters (see `values_dev.yaml` as an example):
-1. `architecture: standalone`
-2. `replicaCount: 1`
-3. You will also need to modify MongoDB connection string in Cognigy.AI Helm chart later on.
+For testing and development purposes on clusters without availability zones you can install a single replica MongoDB instance. For this you need to set following parameters (see `values_dev.yaml` as an example): 
+* `replicaCount: 1`
+
+You will also need to modify MongoDB connection string in Cognigy.AI Helm chart later on.
 
 ## Installing the Chart
 After the parameters are set a new release can be deployed via Helm into `mongodb` namespace, use proper values.yaml file if you copied and renamed it before:

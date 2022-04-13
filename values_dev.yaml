@@ -23,7 +23,7 @@ image:
   pullSecrets: []
   debug: false
 schedulerName: ""
-architecture: standalone
+architecture: replicaset
 useStatefulSet: true
 auth:
   enabled: true
