@@ -48,6 +48,11 @@ You will also need to modify MongoDB connection string in Cognigy.AI Helm chart 
 
 ## Installing the Chart
 After the parameters are set a new release can be deployed via Helm into `mongodb` namespace, use proper values.yaml file if you copied and renamed it before:
+* Installing from Cognigy Container Registry (recommended):
+```
+helm upgrade --install --namespace mongodb mongodb oci://cognigy.azurecr.io/helm/mongodb --version 10.30.2 --values values.yaml --create-namespace
+```
+* Alternatively you can install it from the local chart (not recommended): 
 ```
 helm upgrade --install -n mongodb mongodb ./charts/bitnami/mongodb --values values.yaml --create-namespace
 ```
