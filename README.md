@@ -13,12 +13,6 @@ Cognigy.AI requires certain performance requirements for MongoDB storage. To mee
    ```
    kubeclt apply -f cloud-providers/aws/mongodb.yaml
    ```
-### Namespace
-This Installation guide assumes that MongoDB setup is deployed into `mongodb` namespace. Create `mongodb` namespace with:
-```
-kubectl create ns mongodb
-```
-If you need to place a deployment into another namespace, modify following commands accordingly. We suggest not to modify the deployment namespace as you will need to adapt Cognigy.AI installation scripts later in this case.
 
 ### High Availability
 The chart is configured to install MongoDB replicas across three availability zones (e.g. `eu-central-1a`, `eu-central-1b` and `eu-central-1c`). To accomplish this, `topology.kubernetes.io/zone` Kubernetes label is used in `nodeAffinityPreset` rules and set in `values.yaml` by default. This label is one of [well-known labels](https://kubernetes.io/docs/reference/labels-annotations-taints/#topologykubernetesiozone) and is therefore present in all major cloud providers. The setup uses an anti-affinity to accomplish this behavior: if the label `uniquezone=set` is found for a pod, another MongoDB pod cannot be installed with this label in the same availability zone.
@@ -27,36 +21,53 @@ The chart is configured to install MongoDB replicas across three availability zo
 To deploy a new MongoDB setup adjust the values accordingly in the `values.yaml` file. You can also copy the default `values.yaml` file into another file and name it accordingly. e.g. `my-mongodb-values.yaml`. In this case you need to set all the following configuration parameters and apply following commands to this file. For a full description of `values.yaml` parameters see [official Bitnami documentation](https://github.com/bitnami/charts/tree/master/bitnami/mongodb)
 
 You need to set at least following parameters for this Helm release:
-1. Set root user password. Create a secure password and set it in `values.yaml` under `auth.rootPassword` variable:
+1. Set MongoDB root user password. Create a secure password and set it in `values.yaml` under `auth.rootPassword` variable:
    ```
     auth:
         enabled: true
         rootUser: "root"
         rootPassword: "" # enter password
-
    ```
 2. **Set the same root password in `metrics` section via `metrics.password` variable** for prometheus metrics container to be able to connect to the database, otherwise the deployment will crash.
-3.f Create another secure password and set it for replica set in `auth.replicaSetKey` variable. This password is used to authenticate replicas in their internal communication.
+3. Create another secure password and set it for replica set in `auth.replicaSetKey` variable. This password is used to authenticate MongoDB replicas in their internal communication.
 4. Set the `size` of the MongoDB persistent volume under `persistence` according to your requirements. We set it recommended value of `50GB` for Cognigy.AI installation by default.
 5. OPTIONAL: configure other parameters in `values.yaml` as required. 
 
 ### Development Environment
-For testing and development purposes on clusters without availability zones you can install a single replica MongoDB instance. For this you need to set following parameters (see `values_dev.yaml` as an example): 
+For testing and development purposes on clusters without availability zones you can install a single replica MongoDB instance. For this you need to set following parameters:
 * `replicaCount: 1`
 
-You will also need to modify MongoDB connection string in Cognigy.AI Helm chart later on.
+We provide `values_dev.yaml` as an example for  testing single-replica setup.
+You will also need to modify MongoDB connection string in Cognigy.AI Helm chart accordingly.
 
 ## Installing the Chart
-After the parameters are set a new release can be deployed via Helm into `mongodb` namespace, use proper values.yaml file if you copied and renamed it before:
-* Installing from Cognigy Container Registry (recommended):
-```
-helm upgrade --install --namespace mongodb mongodb oci://cognigy.azurecr.io/helm/mongodb --version 10.30.2 --values values.yaml --create-namespace
-```
-* Alternatively you can install it from the local chart (not recommended): 
+### Namespace
+This Installation guide assumes that MongoDB setup is deployed into `mongodb` namespace. If you need to place a deployment into another namespace, modify following commands accordingly. We suggest not to modify the deployment namespace as you will need to adapt Cognigy.AI installation scripts later in this case.
+
+### Installation
+After the parameters are set a new release can be deployed via Helm, use proper `values.yaml` file if you copied and renamed it before.
+
+1. Installing from Cognigy Container Registry (recommended):
+   * You need to create docker-registry secret and to log in into Cognigy Container Registry to pull the helm chart and related images, for this execute following commands, substitute <your-username> and <your-password> with credentials provided to you to access Cognigy Container Registry: 
+    ```
+    kubectl create secret docker-registry cognigy-registry-token \
+    --docker-server=cognigy.azurecr.io \
+    --docker-username=<your-username> \
+    --docker-password=<your-password>
+  
+    helm registry login cognigy.azurecr.io \
+    --username <your-username> \
+    --password <your-password>
+    ```
+    * install MongoDB Helm Release
+    ```
+    helm upgrade --install --namespace mongodb mongodb oci://cognigy.azurecr.io/helm/mongodb --version 10.30.2 --values values.yaml --create-namespace
+    ```
+2. Alternatively you can install MongoDB Helm release from the local chart (not recommended): 
 ```
 helm upgrade --install -n mongodb mongodb ./charts/bitnami/mongodb --values values.yaml --create-namespace
 ```
-Pods are created one by one, so you need to wait a bit. To verify all pods are in a ready state, you can execute:
+3. Check that MongoDB deployment is up-and-running. Pods are created one by one, so you need to wait a bit. To verify all pods are in a ready state, you can execute:
 ```
 kubectl get pods -n mongodb
 ```
@@ -75,7 +86,9 @@ helm -n mongodb upgrade mongodb bitnami/mongodb --values values.yaml
 helm -n mongodb uninstall mongodb
 ```
 ## Cleaning up
-Please keep in mind that Persistent Volume Claims (PVC) are not removed when you delete the Helm release. To fully remove them you need to run the following command. **IMPORTANT: If you run this command, all data persisted in MongoDB will be lost!**
+Please keep in mind that Persistent Volume Claims (PVC) are not removed when you delete the Helm release. To fully remove them you need to run the following command. 
+
+**IMPORTANT: If you run this command, all data persisted in MongoDB will be lost!**
 ```
 kubectl delete -n=mongodb pvc --all
 ```
