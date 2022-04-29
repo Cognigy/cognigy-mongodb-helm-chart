@@ -5,14 +5,15 @@ This Helm Chart installs a Multi-Replica MongoDB setup with High Availability (H
 - Kubernetes v1.19-1.22 Cluster on AWS EKS or Azure AKS 
 - kubectl utility connected to the kubernetes cluster
 - Helm 3.8.0+
-- Persistent Volume provisioner in the underlying infrastructure
+- Persistent Volume provisioner in the underlying infrastructure for MongoDB PVCs
 
 ## Configuration 
 ### Storage Class
-Cognigy.AI requires certain performance requirements for MongoDB storage. To meet such requirements and to deploy MongoDB on common public cloud providers you need to create `mongodb` StorageClass accordingly. Manifests for storage classes are located in `cloud-providers` folder. E.g. for AWS create `mongodb` StorageClass with:
+Cognigy.AI requires certain performance requirements for MongoDB storage. To meet such requirements and to deploy MongoDB on common public cloud providers you need to create `mongodb` `StorageClass` accordingly. Manifests for storage classes are located in `cloud-providers` folder. E.g. for AWS create `mongodb` StorageClass with:
    ```
    kubeclt apply -f cloud-providers/aws/mongodb.yaml
    ```
+For generic on-premises cloud provider (e.g. OpenShift on VMWare, OpenStack etc.) you need to adapt `StorageClass` manifest file accordingly. The `mongodb` `StorageClass` must support high IO throughput, see [AWS storage class](cloud-providers/aws/mongodb.yaml) as a reference. Please, contact official documentation of your cloud provider for further details.
 
 ### High Availability
 The chart is configured to install MongoDB replicas across three availability zones (e.g. `eu-central-1a`, `eu-central-1b` and `eu-central-1c`). To accomplish this, `topology.kubernetes.io/zone` Kubernetes label is used in `nodeAffinityPreset` rules and set in `values.yaml` by default. This label is one of [well-known labels](https://kubernetes.io/docs/reference/labels-annotations-taints/#topologykubernetesiozone) and is therefore present in all major cloud providers. The setup uses an anti-affinity to accomplish this behavior: if the label `uniquezone=set` is found for a pod, another MongoDB pod cannot be installed with this label in the same availability zone.
@@ -29,7 +30,7 @@ You need to set at least following parameters for this Helm release:
         rootPassword: "" # enter password
    ```
 2. **Set the same root password in `metrics` section via `metrics.password` variable** for prometheus metrics container to be able to connect to the database, otherwise the deployment will crash.
-3. Create another secure password and set it for replica set in `auth.replicaSetKey` variable. This password is used to authenticate MongoDB replicas in their internal communication.
+3. Create **another** secure password and set it for replica set in `auth.replicaSetKey` variable. This password is used to authenticate MongoDB replicas in their internal communication.
 4. Set the `size` of the MongoDB persistent volume under `persistence` according to your requirements. We set it recommended value of `50GB` for Cognigy.AI installation by default.
 5. OPTIONAL: configure other parameters in `values.yaml` as required. 
 
