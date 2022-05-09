@@ -8,7 +8,7 @@ metadata:
 provisioner: disk.csi.azure.com
 allowVolumeExpansion: true
 volumeBindingMode: WaitForFirstConsumer
-reclaimPolicy: Retain
+reclaimPolicy: Delete
 parameters:
   cachingmode: ReadOnly
   kind: Managed
