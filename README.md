@@ -50,7 +50,7 @@ After the parameters are set a new release can be deployed via Helm, use proper 
     kubectl create secret docker-registry cognigy-registry-token \
     --docker-server=cognigy.azurecr.io \
     --docker-username=<your-username> \
-    --docker-password=<your-password>
+    --docker-password=<your-password> -n mongodb
   
     helm registry login cognigy.azurecr.io \
     --username <your-username> \
