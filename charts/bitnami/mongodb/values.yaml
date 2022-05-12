@@ -16,11 +16,12 @@ diagnosticMode:
   args:
     - infinity
 image:
-  registry: docker.io
-  repository: bitnami/mongodb
+  registry: cognigy.azurecr.io
+  repository: mongodb
   tag: 4.2.5-debian-10-r54
   pullPolicy: IfNotPresent
-  pullSecrets: []
+  pullSecrets:
+    - cognigy-registry-token
   debug: false
 schedulerName: ""
 architecture: replicaset
@@ -361,11 +362,12 @@ hidden:
 metrics:
   enabled: true
   image:
-    registry: docker.io
-    repository: bitnami/mongodb-exporter
+    registry: cognigy.azurecr.io
+    repository: mongodb-exporter
     tag: 0.20.7-debian-10-r16
     pullPolicy: IfNotPresent
-    pullSecrets: []
+    pullSecrets:
+      - cognigy-registry-token
   username: "root"
   password: "" # enter password
   extraFlags: "--compatible-mode"

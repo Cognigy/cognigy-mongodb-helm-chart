@@ -4,8 +4,8 @@ auth:
   replicaSetKey: "" # enter replica set password
 persistence:
   storageClass: "mongodb"
-  size: 50Gi
-replicaCount: 1
+  size: 200Gi
+replicaCount: 3
 metrics:
   enabled: true
   username: "root"

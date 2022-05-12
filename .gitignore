@@ -1,6 +1,3 @@
-# Build artifacts
-/azure-repo
-
 # OSX leaves these everywhere on SMB shares
 ._*
 
