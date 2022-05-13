@@ -7,7 +7,7 @@ This Helm Chart installs a Multi-Replica MongoDB setup with High Availability (H
    - Azure AKS
    - generic on-premises kubernetes platform. Running MongoDB Helm Chart on-premises will require additional manual configuration, we recommend to use public clouds (AWS or Azure) instead.
 - kubectl utility connected to the kubernetes cluster
-- Helm 3.8.0+
+- **Helm 3.8.0+ (lower versions of Helm do not support OCI registries!)** 
 - Persistent Volume provisioner in the underlying infrastructure for MongoDB persistent volumes (for AWS/Azure no further configuration is required)
 
 ## Configuration 
@@ -47,6 +47,7 @@ After the parameters are set a new release can be deployed via Helm, use proper 
 1. Installing from Cognigy Container Registry (recommended):
    * You need to create docker-registry secret and to log in into Cognigy Container Registry to pull the helm chart and related images, for this execute following commands, substitute <your-username> and <your-password> with your credentials to access Cognigy Container Registry: 
     ```
+    kubectl create namespace mongodb
     kubectl create secret docker-registry cognigy-registry-token \
     --docker-server=cognigy.azurecr.io \
     --docker-username=<your-username> \
@@ -58,7 +59,7 @@ After the parameters are set a new release can be deployed via Helm, use proper 
     ```
     * install MongoDB Helm Release
     ```
-    helm upgrade --install --namespace mongodb mongodb oci://cognigy.azurecr.io/helm/mongodb --version 10.30.2 --values YOUR_VALUES_FILE.yaml --create-namespace
+    helm upgrade --install --namespace mongodb mongodb oci://cognigy.azurecr.io/helm/mongodb --version 10.30.2 --values YOUR_VALUES_FILE.yaml
     ```
 2. Alternatively you can install MongoDB Helm release from the local chart (not recommended): 
 ```
