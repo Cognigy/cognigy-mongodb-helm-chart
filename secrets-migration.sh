@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-# This script gets a set of defined secrets and replaces the MongoDB hosts in a connection string.
+# This script gets a set of defined secrets and replaces the MongoDB hosts from single replica to 3 replicas in a connection string. 
+# This script considers all the existing secrets has been backed up in the "secrets" folder and take the secrets from there as an 
+# input. Make sure all secrets are stored in the secrets folder before running the scripts.   
 
 set -o errexit
 set -o nounset
