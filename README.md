@@ -13,7 +13,7 @@ This Helm Chart installs a Multi-Replica MongoDB setup with High Availability (H
 ### Storage Class
 Cognigy.AI requires certain performance requirements for MongoDB storage. To meet such requirements and to deploy MongoDB on common public cloud providers you need to create `mongodb` kubernetes `StorageClass` accordingly. Manifests for the `mongodb StorageClass` are located in `cloud-providers` folder. E.g. for AWS create `mongodb StorageClass` with:
    ```
-   kubeclt apply -f cloud-providers/aws/mongodb.yaml
+   kubectl apply -f cloud-providers/aws/mongodb.yaml
    ```
 For generic (on-premises) kubernetes cloud provider you need to prepare `StorageClass` manifest yourself ensuring the underlying infrastructure can provision the required persistent volume on-demand. `mongodb StorageClass` must support high IO throughput, see [AWS example](cloud-providers/aws/mongodb.yaml) for reference.
 
