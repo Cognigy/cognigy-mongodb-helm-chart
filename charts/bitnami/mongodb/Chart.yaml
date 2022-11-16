@@ -9,7 +9,6 @@ dependencies:
       - bitnami-common
     version: 1.x.x
 description: NoSQL document-oriented database that stores JSON-like documents with dynamic schemas, simplifying the integration of data in content-driven applications.
-engine: gotpl
 home: https://github.com/bitnami/charts/tree/master/bitnami/mongodb
 icon: https://bitnami.com/assets/stacks/mongodb/img/mongodb-stack-220x234.png
 keywords:
@@ -27,4 +26,4 @@ sources:
   - https://github.com/bitnami/charts/tree/master/bitnami/mongodb
   - https://github.com/bitnami/bitnami-docker-mongodb
   - https://mongodb.org
-version: 10.30.3
+version: 10.30.4
