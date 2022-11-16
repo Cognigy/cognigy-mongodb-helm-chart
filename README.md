@@ -62,7 +62,7 @@ After the parameters are set a new release can be deployed via Helm, use proper 
     ```
     * install MongoDB Helm Release
     ```
-    helm upgrade --install --namespace mongodb mongodb oci://cognigy.azurecr.io/helm/mongodb --version 10.30.3 --values YOUR_VALUES_FILE.yaml
+    helm upgrade --install --namespace mongodb mongodb oci://cognigy.azurecr.io/helm/mongodb --version 10.30.4 --values YOUR_VALUES_FILE.yaml
     ```
 2. Alternatively you can install MongoDB Helm release from the local chart (not recommended): 
 ```
