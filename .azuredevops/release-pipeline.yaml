@@ -1,10 +1,13 @@
 name: $(why)_helm_release_$(SourceBranchName)_$(Date:yyyyMMdd)
 
 trigger:
-  batch: true
-  branches:
+  batch: "true"
+  paths:
+    exclude:
+      - README.md
+  tags:
     include:
-      - master
+      - '*'
 
 resources:
   - repo: self
