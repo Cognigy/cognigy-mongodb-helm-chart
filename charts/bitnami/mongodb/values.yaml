@@ -370,7 +370,7 @@ metrics:
       - cognigy-registry-token
   username: "root"
   password: "" # enter password
-  extraFlags: "--compatible-mode"
+  extraFlags: "--collect-all --compatible-mode"
   extraUri: ""
   resources:
     limits: {}
