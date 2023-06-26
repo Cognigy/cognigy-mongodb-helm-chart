@@ -1,21 +1,30 @@
 name: $(why)_helm_release_$(SourceBranchName)_$(Date:yyyyMMdd)
 
 trigger:
-  batch: "true"
-  paths:
+  batch: true
+  branches:
     exclude:
-      - README.md
+      - "*"
   tags:
     include:
-      - '*'
+      - "*"
 
 resources:
-  - repo: self
+  repositories:
+    - repository: self
+
+    - repository: GitHub
+      type: github
+      endpoint: github.com_mayrbenjamin92
+      name: Cognigy/cognigy-mongodb-helm-chart
+      ref: master
 
 variables:
   azureContainerRegistry: "Azure Container Registry Prod"
   chartName: "mongodb"
   chartPath: "charts/bitnami/mongodb"
+  chartGithubPath: "cognigy-mongodb-helm-chart"
+  AzureDevOpsRepo: "helm-chart-cognigy-mongodb"
   ACRName: "cognigy.azurecr.io"
   ACRPath: "helm"
   ${{ if eq(variables['Build.Reason'], 'Manual') }}:
@@ -30,7 +39,8 @@ stages:
   - stage: helmChartRelease
     displayName: Create a new release tag and Helm Chart release
     jobs:
-      - job: createNewRelease
+      - job: createOciRelease
+        displayName: Publish Helm Chart OCI Fragment
         steps:
           - task: HelmInstaller@0
             displayName: Install Helm 3.8.2
@@ -50,3 +60,48 @@ stages:
               echo "Helm Chart" $(chartName) "version:" $helmChartVersion
               helm package --dependency-update $(chartPath)
               helm push ./$(chartName)-$helmChartVersion.tgz oci://$(ACRName)/$(ACRPath)
+
+      - job: createGithubRelease
+        displayName: Publish Helm Chart Github repo
+        steps:
+          - task: HelmInstaller@0
+            displayName: Install Helm 3.8.2
+            inputs:
+              helmVersion: 3.8.2
+              checkLatestHelmVersion: false
+
+          - checkout: self
+            persistCredentials: "true"
+            clean: "true"
+            displayName: Checkout Helm Chart Source Repo
+
+          - checkout: GitHub
+            persistCredentials: "true"
+            clean: "true"
+            displayName: Checkout Helm Chart Target Repo
+
+          - script: |
+              git config --global user.email "azure-pipeline@cognigy.com"
+              git config --global user.name "Azure Pipelines Bot"
+              
+              cd $(chartGithubPath)
+              rm -fr ./*
+              cd ..
+
+              cd $(AzureDevOpsRepo)
+              helmChartVersion="$(yq e '.version' $(chartPath)/Chart.yaml)"
+              echo "Helm Chart version is $helmChartVersion"
+
+              rm -fr .git
+              rm -fr CHANGELOG
+              cp -r ./ ../$(chartGithubPath)
+
+              cd ../$(chartGithubPath)
+              git fetch origin
+              git checkout -b master --track origin/master
+              git add -A
+              git commit -m "Adding files for Helm Chart $helmChartVersion"
+              git tag v$helmChartVersion
+
+              git push origin master
+              git push origin tags/$helmChartVersion
