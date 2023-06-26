@@ -101,7 +101,7 @@ stages:
               git checkout -b master --track origin/master
               git add -A
               git commit -m "Adding files for Helm Chart $helmChartVersion"
-              git tag v$helmChartVersion
+              git tag $helmChartVersion
 
               git push origin master
               git push origin tags/$helmChartVersion
