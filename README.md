@@ -2,12 +2,12 @@
 This Helm Chart installs a Multi-Replica MongoDB setup with High Availability (HA) support across three availability zones. It is based on [MongoDB chart by Bitnami](https://github.com/bitnami/charts/tree/master/bitnami/mongodb) and installs MongoDB v4.2.5 compatible with Cognigy.AI
 
 ## Prerequisites
-- Kubernetes v1.19-1.23 running on either:
+- Kubernetes v1.19-1.26 running on either:
    - AWS EKS
    - Azure AKS
    - generic on-premises kubernetes platform. Running MongoDB Helm Chart on-premises will require additional manual configuration, we recommend to use public clouds (AWS or Azure) instead.
 - kubectl utility connected to the kubernetes cluster
-- **Helm 3.8.0+ (lower versions of Helm do not support OCI registries!)** 
+- Helm v3.10-v3.12
 - Persistent Volume provisioner in the underlying infrastructure for MongoDB persistent volumes (for AWS/Azure no further configuration is required)
 
 ### Storage Class
