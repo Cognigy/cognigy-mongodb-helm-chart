@@ -18,7 +18,7 @@ diagnosticMode:
 image:
   registry: cognigy.azurecr.io
   repository: mongodb
-  tag: 5.0.18-debian-11-r3
+  tag: 5.0.23-debian-11-r3
   pullPolicy: IfNotPresent
   pullSecrets:
     - cognigy-registry-token
@@ -364,7 +364,7 @@ metrics:
   image:
     registry: cognigy.azurecr.io
     repository: mongodb-exporter
-    tag: 0.37.0-debian-11-r22
+    tag: 0.40.0-debian-11-r1
     pullPolicy: IfNotPresent
     pullSecrets:
       - cognigy-registry-token
