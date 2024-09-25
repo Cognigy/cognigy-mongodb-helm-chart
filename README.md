@@ -2,7 +2,7 @@
 This Helm Chart installs a Multi-Replica MongoDB setup with High Availability (HA) support across three availability zones. It is based on [MongoDB chart by Bitnami](https://github.com/bitnami/charts/tree/master/bitnami/mongodb) and installs MongoDB v4.2.5 compatible with Cognigy.AI
 
 ## Prerequisites
-- Kubernetes v1.19-1.26 running on either:
+- Kubernetes v1.21-v1.30 running on either:
    - AWS EKS
    - Azure AKS
    - generic on-premises kubernetes platform. Running MongoDB Helm Chart on-premises will require additional manual configuration, we recommend to use public clouds (AWS or Azure) instead.
@@ -50,7 +50,7 @@ After the parameters are set a new release can be deployed via Helm, use proper 
 
 1. Installing from Cognigy Container Registry (recommended):
    * You need to create docker-registry secret and to log in into Cognigy Container Registry to pull the helm chart and related images. For this to work, execute following commands, substitute <your-username> and <your-password> with your credentials to access Cognigy Container Registry: 
-    ```
+    ```sh
     kubectl create secret docker-registry cognigy-registry-token \
     --docker-server=cognigy.azurecr.io \
     --docker-username=<your-username> \
@@ -60,16 +60,16 @@ After the parameters are set a new release can be deployed via Helm, use proper 
     --username <your-username> \
     --password <your-password>
     ```
-    * install MongoDB Helm Release
-    ```
-    helm upgrade --install --namespace mongodb mongodb oci://cognigy.azurecr.io/helm/mongodb --version 10.30.8 --values YOUR_VALUES_FILE.yaml
+    * install MongoDB Helm Release. Provide the latest git tag of this repository instead of `HELM_CHART_VERSION` placeholder: 
+    ```sh
+    helm upgrade --install --namespace mongodb mongodb oci://cognigy.azurecr.io/helm/mongodb --version HELM_CHART_VERSION --values YOUR_VALUES_FILE.yaml
     ```
 2. Alternatively you can install MongoDB Helm release from the local chart (not recommended): 
-```
+```sh
 helm upgrade --install -n mongodb mongodb ./charts/bitnami/mongodb --values YOUR_VALUES_FILE.yaml --create-namespace
 ```
 3. Check that MongoDB deployment is up-and-running. Pods are created one by one, so you need to wait a bit. To verify all pods are in a ready state, you can execute:
-```
+```sh
 kubectl get pods -n mongodb
 ```
 You should see 3 replica of `mongodb` pods in ready state in `mongodb` namespace.
@@ -79,13 +79,19 @@ The chart natively supports monitoring of MongoDB with Prometheus metrics. `metr
 
 ## Upgrading Helm Release
 To upgrade MongoDB Helm release to a newer `HELM_CHART_VERSION` version, you need to execute following command. Use the same `YOUR_VALUES_FILE.yaml` you have used before!
+
+```sh
+helm upgrade --install --namespace mongodb mongodb oci://cognigy.azurecr.io/helm/mongodb --version HELM_CHART_VERSION --values YOUR_VALUES_FILE.yaml
 ```
-helm -n mongodb upgrade mongodb bitnami/mongodb --version HELM_CHART_VERSION --values YOUR_VALUES_FILE.yaml
-```
+
+### From 10.30.8 to 13.18.5
+
+This upgrade requires additional steps which need to be executed. Check [the upgrade guide](upgrade/upgrade-13.18.5.md) for detailed instruction.
+
 
 ## Uninstalling the Chart
 To uninstall a Helm release execute: 
-```
+```sh
 helm -n mongodb uninstall mongodb
 ```
 
@@ -93,6 +99,6 @@ helm -n mongodb uninstall mongodb
 Please keep in mind that Persistent Volume Claims (PVC) and the related data are not removed when you uninstall the Helm release bu default. To fully remove them you need to run the following command. 
 
 **IMPORTANT: If you run this command, all data persisted in MongoDB will be lost!**
-```
+```sh
 kubectl delete -n=mongodb pvc --all
 ```
