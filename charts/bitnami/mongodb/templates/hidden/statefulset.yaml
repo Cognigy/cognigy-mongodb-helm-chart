@@ -1,5 +1,5 @@
 {{- /*
-Copyright VMware, Inc.
+Copyright Broadcom, Inc. All Rights Reserved.
 SPDX-License-Identifier: APACHE-2.0
 */}}
 
@@ -49,6 +49,7 @@ spec:
       schedulerName: {{ .Values.hidden.schedulerName | quote }}
       {{- end }}
       serviceAccountName: {{ template "mongodb.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.hidden.automountServiceAccountToken }}
       {{- if .Values.hidden.hostAliases }}
       hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.hidden.hostAliases "context" $) | nindent 8 }}
       {{- end }}
@@ -76,40 +77,26 @@ spec:
       runtimeClassName: {{ .Values.hidden.runtimeClassName }}
       {{- end }}
       {{- if .Values.hidden.podSecurityContext.enabled }}
-      securityContext: {{- omit .Values.hidden.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.hidden.podSecurityContext "context" $) | nindent 8 }}
       {{- end }}
       {{ if .Values.hidden.terminationGracePeriodSeconds }}
       terminationGracePeriodSeconds: {{ .Values.hidden.terminationGracePeriodSeconds }}
       {{- end }}
-      {{- if or .Values.hidden.initContainers (and .Values.volumePermissions.enabled .Values.hidden.persistence.enabled) (and .Values.externalAccess.hidden.enabled .Values.externalAccess.autoDiscovery.enabled) .Values.tls.enabled }}
+      enableServiceLinks: {{ .Values.enableServiceLinks }}
       initContainers:
         {{- if .Values.hidden.initContainers }}
         {{- include "common.tplvalues.render" (dict "value" .Values.hidden.initContainers "context" $) | nindent 8 }}
         {{- end }}
         {{- if and .Values.volumePermissions.enabled .Values.hidden.persistence.enabled }}
-        - name: volume-permissions
-          image: {{ include "mongodb.volumePermissions.image" . }}
-          imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}
-          command:
-            - /bin/bash
-          args:
-            - -ec
-            - |
-              mkdir -p {{ printf "%s/%s" .Values.hidden.persistence.mountPath (default "" .Values.hidden.persistence.subPath) }}
-              chown {{ .Values.containerSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} {{ printf "%s/%s" .Values.hidden.persistence.mountPath (default "" .Values.hidden.persistence.subPath) }}
-              find  {{ printf "%s/%s" .Values.hidden.persistence.mountPath (default "" .Values.hidden.persistence.subPath) }} -mindepth 1 -maxdepth 1 -not -name ".snapshot" -not -name "lost+found" | xargs -r chown -R {{ .Values.containerSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }}
-          {{- if eq ( toString ( .Values.volumePermissions.securityContext.runAsUser )) "auto" }}
-          securityContext: {{- omit .Values.volumePermissions.securityContext "runAsUser" | toYaml | nindent 12 }}
-          {{- else }}
-          securityContext: {{- .Values.volumePermissions.securityContext | toYaml | nindent 12 }}
-          {{- end }}
-          {{- if .Values.volumePermissions.resources }}
-          resources: {{- toYaml .Values.volumePermissions.resources | nindent 12 }}
-          {{- end }}
-          volumeMounts:
-            - name: datadir
-              mountPath: {{ .Values.hidden.persistence.mountPath }}
+        {{- include "mongodb.initContainer.volumePermissions" . | indent 8 }}
         {{- end }}
+        {{- if and .Values.externalAccess.hidden.enabled .Values.externalAccess.autoDiscovery.enabled (eq .Values.externalAccess.hidden.service.type "LoadBalancer") }}
+        {{- include "mongodb.initContainers.autoDiscovery" . | indent 8 }}
+        {{- end }}
+        {{- if and .Values.externalAccess.enabled ( or .Values.externalAccess.service.publicNames  .Values.externalAccess.service.domain ) }}
+        {{- include "mongodb.initContainers.dnsCheck" . | indent 8 }}
+        {{- end }}
+        {{- include "mongodb.initContainer.prepareLogDir" . | nindent 8 }}
         {{- if .Values.tls.enabled }}
         - name: generate-tls-certs
           image: {{ include "mongodb.tls.image" . }}
@@ -141,6 +128,9 @@ spec:
               mountPath: /certs
             - name: common-scripts
               mountPath: /bitnami/scripts
+            - name: empty-dir
+              mountPath: /tmp
+              subPath: tmp-dir
           command:
             - /bitnami/scripts/generate-certs.sh
           args:
@@ -148,43 +138,21 @@ spec:
             {{- if .Values.externalAccess.hidden.service.loadBalancerIPs }}
             - -i {{ join "," .Values.externalAccess.hidden.service.loadBalancerIPs }}
             {{- end }}
-            {{- if .Values.tls.extraDnsNames }}
-            - -n {{ join "," .Values.tls.extraDnsNames }}
+            {{- if or .Values.tls.extraDnsNames .Values.externalAccess.service.publicNames }}
+            - -n {{ join "," ( concat  .Values.tls.extraDnsNames .Values.externalAccess.service.publicNames ) }}
             {{- end }}
           {{- if .Values.tls.resources }}
-          resources: {{- toYaml .Values.tls.resources | nindent 12 }}
+          resources: {{- include "common.tplvalues.render" (dict "value" .Values.tls.resources "context" $) | nindent 12 }}
+          {{- else if ne .Values.tls.resourcesPreset "none" }}
+          resources: {{- include "common.resources.preset" (dict "type" .Values.tls.resourcesPreset) | nindent 12 }}
           {{- end }}
         {{- end }}
-        {{- if and .Values.externalAccess.hidden.enabled .Values.externalAccess.autoDiscovery.enabled (eq .Values.externalAccess.hidden.service.type "LoadBalancer") }}
-        - name: auto-discovery
-          image: {{ include "mongodb.externalAccess.autoDiscovery.image" . }}
-          imagePullPolicy: {{ .Values.externalAccess.autoDiscovery.image.pullPolicy | quote }}
-          command:
-            - /scripts/auto-discovery.sh
-          env:
-            - name: MY_POD_NAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.name
-            - name: SHARED_FILE
-              value: "/shared/info.txt"
-          {{- if .Values.externalAccess.autoDiscovery.resources }}
-          resources: {{- toYaml .Values.externalAccess.autoDiscovery.resources | nindent 12 }}
-          {{- end }}
-          volumeMounts:
-            - name: shared
-              mountPath: /shared
-            - name: scripts
-              mountPath: /scripts/auto-discovery.sh
-              subPath: auto-discovery.sh
-        {{- end }}
-      {{- end }}
       containers:
         - name: mongodb
           image: {{ include "mongodb.image" . }}
           imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
           {{- if .Values.hidden.containerSecurityContext.enabled }}
-          securityContext: {{- omit .Values.hidden.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.hidden.containerSecurityContext "context" $) | nindent 12 }}
           {{- end }}
           {{- if .Values.diagnosticMode.enabled }}
           command: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.command "context" $) | nindent 12 }}
@@ -228,7 +196,7 @@ spec:
             - name: MONGODB_REPLICA_SET_MODE
               value: "hidden"
             - name: MONGODB_INITIAL_PRIMARY_HOST
-              value: {{ printf "%s-0.$(K8S_SERVICE_NAME).$(MY_POD_NAMESPACE).svc.%s" (include "mongodb.fullname" .) .Values.clusterDomain }}
+              value: {{ include "mongodb.initialPrimaryHost" . | quote }}
             - name: MONGODB_REPLICA_SET_NAME
               value: {{ .Values.replicaSetName | quote }}
             {{- if and .Values.replicaSetHostnames (not .Values.externalAccess.hidden.enabled) }}
@@ -295,7 +263,10 @@ spec:
               value: {{ ternary "yes" "no" .Values.directoryPerDB | quote }}
             {{- $extraFlags := .Values.hidden.extraFlags | join " " -}}
             {{- if .Values.tls.enabled }}
-              {{- $extraFlags = printf "--tlsMode=%s --tlsCertificateKeyFile=/certs/mongodb.pem --tlsCAFile=/certs/mongodb-ca-cert %s" .Values.tls.mode $extraFlags  }}
+              {{- if .Values.tls.mTLS.enabled }}
+              {{- $extraFlags = printf "--tlsCAFile=/certs/mongodb-ca-cert %s" $extraFlags  }}
+              {{- end }}
+              {{- $extraFlags = printf "--tlsMode=%s --tlsCertificateKeyFile=/certs/mongodb.pem %s" .Values.tls.mode $extraFlags  }}
             {{- end }}
             {{- if ne $extraFlags "" }}
             - name: MONGODB_EXTRA_FLAGS
@@ -303,7 +274,7 @@ spec:
             {{- end }}
             {{- if .Values.tls.enabled }}
             - name: MONGODB_CLIENT_EXTRA_FLAGS
-              value: --tls --tlsCertificateKeyFile=/certs/mongodb.pem --tlsCAFile=/certs/mongodb-ca-cert
+              value: --tls {{ if .Values.tls.mTLS.enabled }}--tlsCertificateKeyFile=/certs/mongodb.pem {{ end }}--tlsCAFile=/certs/mongodb-ca-cert
             {{- end }}
             {{- if .Values.hidden.extraEnvVars }}
             {{- include "common.tplvalues.render" (dict "value" .Values.hidden.extraEnvVars "context" $) | nindent 12 }}
@@ -337,7 +308,7 @@ spec:
           readinessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.hidden.readinessProbe "enabled") "context" $) | nindent 12 }}
             exec:
               command:
-                - /bitnami/scripts/ping-mongodb.sh
+                - /bitnami/scripts/readiness-probe.sh
           {{- end }}
           {{- if .Values.hidden.customStartupProbe }}
           startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.hidden.customStartupProbe "context" $) | nindent 12 }}
@@ -349,7 +320,9 @@ spec:
           {{- end }}
           {{- end }}
           {{- if .Values.hidden.resources }}
-          resources: {{- toYaml .Values.hidden.resources | nindent 12 }}
+          resources: {{- include "common.tplvalues.render" (dict "value" .Values.hidden.resources "context" $) | nindent 12 }}
+          {{- else if ne .Values.hidden.resourcesPreset "none" }}
+          resources: {{- include "common.resources.preset" (dict "type" .Values.hidden.resourcesPreset) | nindent 12 }}
           {{- end }}
           volumeMounts:
             - name: datadir
@@ -377,6 +350,21 @@ spec:
             - name: certs
               mountPath: /certs
             {{- end }}
+            - name: empty-dir
+              mountPath: /tmp
+              subPath: tmp-dir
+            - name: empty-dir
+              mountPath: /opt/bitnami/mongodb/conf
+              subPath: app-conf-dir
+            - name: empty-dir
+              mountPath: /opt/bitnami/mongodb/tmp
+              subPath: app-tmp-dir
+            - name: empty-dir
+              mountPath: /opt/bitnami/mongodb/logs
+              subPath: app-logs-dir
+            - name: empty-dir
+              mountPath: /.mongodb
+              subPath: mongosh-home
             {{- if .Values.hidden.extraVolumeMounts }}
             {{- include "common.tplvalues.render" (dict "value" .Values.hidden.extraVolumeMounts "context" $) | nindent 12 }}
             {{- end }}
@@ -385,7 +373,7 @@ spec:
           image: {{ template "mongodb.metrics.image" . }}
           imagePullPolicy: {{ .Values.metrics.image.pullPolicy | quote }}
           {{- if .Values.containerSecurityContext.enabled }}
-          securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.containerSecurityContext "context" $) | nindent 12 }}
           {{- end }}
           {{- if .Values.diagnosticMode.enabled }}
           command: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.command "context" $) | nindent 12 }}
@@ -426,10 +414,16 @@ spec:
             {{- end }}
             {{- end }}
           volumeMounts:
+            - name: empty-dir
+              mountPath: /tmp
+              subPath: tmp-dir
             {{- if .Values.tls.enabled }}
             - name: certs
               mountPath: /certs
             {{- end }}
+            - name: empty-dir
+              mountPath: /opt/bitnami/redis-cluster/tmp
+              subPath: app-tmp-dir
             {{- if .Values.metrics.extraVolumeMounts }}
             {{- include "common.tplvalues.render" (dict "value" .Values.metrics.extraVolumeMounts "context" $) | nindent 12 }}
             {{- end }}
@@ -441,8 +435,7 @@ spec:
           livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.metrics.customLivenessProbe "context" $) | nindent 12 }}
           {{- else if .Values.metrics.livenessProbe.enabled }}
           livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.metrics.livenessProbe "enabled") "context" $) | nindent 12 }}
-            httpGet:
-              path: /
+            tcpSocket:
               port: metrics
           {{- end }}
           {{- if .Values.metrics.customReadinessProbe }}
@@ -462,13 +455,17 @@ spec:
           {{- end }}
           {{- end }}
           {{- if .Values.metrics.resources }}
-          resources: {{- toYaml .Values.metrics.resources | nindent 12 }}
+          resources: {{- include "common.tplvalues.render" (dict "value" .Values.metrics.resources "context" $) | nindent 12 }}
+          {{- else if ne .Values.metrics.resourcesPreset "none" }}
+          resources: {{- include "common.resources.preset" (dict "type" .Values.metrics.resourcesPreset) | nindent 12 }}
           {{- end }}
         {{- end }}
         {{- if .Values.hidden.sidecars }}
         {{- include "common.tplvalues.render" (dict "value" .Values.hidden.sidecars "context" $) | nindent 8 }}
         {{- end }}
       volumes:
+        - name: empty-dir
+          emptyDir: {}
         - name: common-scripts
           configMap:
             name: {{ printf "%s-common-scripts" (include "mongodb.fullname" .) }}
@@ -531,6 +528,9 @@ spec:
         name: datadir
         {{- if .Values.hidden.persistence.annotations }}
         annotations: {{- include "common.tplvalues.render" (dict "value" .Values.hidden.persistence.annotations "context" $) | nindent 10 }}
+        {{- end }}
+        {{- if .Values.persistence.labels }}
+        labels: {{- include "common.tplvalues.render" (dict "value" .Values.persistence.labels "context" $) | nindent 10 }}
         {{- end }}
       spec:
         accessModes:

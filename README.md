@@ -2,20 +2,17 @@
 This Helm Chart installs a Multi-Replica MongoDB setup with High Availability (HA) support across three availability zones. It is based on [MongoDB chart by Bitnami](https://github.com/bitnami/charts/tree/master/bitnami/mongodb) and installs MongoDB v4.2.5 compatible with Cognigy.AI
 
 ## Prerequisites
-- Kubernetes v1.21-v1.30 running on either:
-   - AWS EKS
-   - Azure AKS
-   - generic on-premises kubernetes platform. Running MongoDB Helm Chart on-premises will require additional manual configuration, we recommend to use public clouds (AWS or Azure) instead.
-- kubectl utility connected to the kubernetes cluster
-- Helm v3.10-v3.12
-- Persistent Volume provisioner in the underlying infrastructure for MongoDB persistent volumes (for AWS/Azure no further configuration is required)
+1. A kubernetes cluster configured according to [Prerequisites](https://docs.cognigy.com/ai/installation/prerequisites/).
+2. Kubernetes, kubectl and Helm versions are compatible with Cognigy.AI as specified in [Version Compatibility Matrix](https://docs.cognigy.com/ai/installation/version-compatibility-matrix/).
+3. `kubectl` and `helm` utilities connected to the Kubernetes cluster in administrative mode.
+4. Persistent Volume provisioner in the underlying infrastructure for MongoDB persistent volumes. Note that for AWS/Azure no further configuration is required.
 
-### Storage Class
+### MongoDB Storage Class
 Cognigy.AI requires certain performance requirements for MongoDB storage. To meet such requirements and to deploy MongoDB on common public cloud providers you need to create `mongodb` kubernetes `StorageClass` accordingly. Manifests for the `mongodb StorageClass` are located in `cloud-providers` folder. E.g. for AWS create `mongodb StorageClass` with:
    ```
    kubectl apply -f cloud-providers/aws/mongodb.yaml
    ```
-For generic (on-premises) kubernetes cloud provider you need to prepare `StorageClass` manifest yourself ensuring the underlying infrastructure can provision the required persistent volume on-demand. `mongodb StorageClass` must support high IO throughput, see [AWS example](cloud-providers/aws/mongodb.yaml) for reference.
+For GKE and on-premises Kubernetes distributions you need to prepare `StorageClass` manifest yourself ensuring the underlying infrastructure can provision the required persistent volume on-demand. `mongodb StorageClass` must support high IO throughput, see examples on [AWS](cloud-providers/aws/mongodb.yaml) or [Azure](cloud-providers/azure/mongodb.yaml) for reference.
 
 ## Configuration
 
