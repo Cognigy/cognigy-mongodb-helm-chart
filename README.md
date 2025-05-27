@@ -85,6 +85,10 @@ helm upgrade --install --namespace mongodb mongodb oci://cognigy.azurecr.io/helm
 
 This upgrade requires additional steps which need to be executed. Check [the upgrade guide](upgrade/upgrade-13.18.5.md) for detailed instruction.
 
+### From 13.18.5 to 15.6.26
+
+This upgrade requires additional steps which need to be executed. Check [the upgrade guide](upgrade/upgrade-15.6.26.md) for detailed instruction.
+
 
 ## Uninstalling the Chart
 To uninstall a Helm release execute: 
