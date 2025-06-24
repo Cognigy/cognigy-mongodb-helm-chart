@@ -89,6 +89,10 @@ This upgrade requires additional steps which need to be executed. Check [the upg
 
 This upgrade requires additional steps which need to be executed. Check [the upgrade guide](upgrade/upgrade-15.6.26.md) for detailed instruction.
 
+### From 15.6.26 to 15.6.27
+
+This upgrade requires additional steps which need to be executed. Check [the upgrade guide](upgrade/upgrade-15.6.27.md) for detailed instruction.
+
 
 ## Uninstalling the Chart
 To uninstall a Helm release execute: 
