@@ -93,6 +93,13 @@ This upgrade requires additional steps which need to be executed. Check [the upg
 
 This upgrade requires additional steps which need to be executed. Check [the upgrade guide](upgrade/upgrade-15.6.27.md) for detailed instruction.
 
+### From 15.6.27 to 15.6.28
+
+Run the Helm upgrade command:
+
+    ```sh
+    helm upgrade --install --namespace mongodb mongodb oci://cognigy.azurecr.io/helm/mongodb --version 15.6.28 --values YOUR_VALUES_FILE.yaml
+    ```
 
 ## Uninstalling the Chart
 To uninstall a Helm release execute: 
